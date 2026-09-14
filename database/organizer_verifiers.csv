@@ -1,4 +1,0 @@
-verifier_id,full_name,email,phone,password_hash,account_status,created_at
-VER-2026-000001,"Suresh Menon",suresh.menon@ticketplatform.com,9100000001,verifier_hash_001,ACTIVE,"2026-09-08 12:42:33"
-VER-2026-000002,"Neha Kapoor",neha.kapoor@ticketplatform.com,9100000002,verifier_hash_002,ACTIVE,"2026-09-08 12:42:33"
-VER-2026-000003,"Ramesh Iyer",ramesh.iyer@ticketplatform.com,9100000003,verifier_hash_003,ACTIVE,"2026-09-08 12:42:33"
