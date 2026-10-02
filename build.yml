@@ -1,0 +1,75 @@
+# ============================================================
+# CO6 — Deployment, Observability & Delivery
+# Topic: Automated CI/CD Pipeline (GitHub Actions)
+# Purpose: Compiles, runs tests across Java/Python/Node, and validates container builds.
+# ============================================================
+
+name: Universal Tickets CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  backend-spring-test:
+    name: Java Spring Boot Tests (CO1, CO5)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+      - name: Compile and Test Backend
+        run: |
+          cd backend
+          mvn test
+
+  gateway-fastapi-test:
+    name: Python FastAPI & Vector Search Tests (CO2, CO3)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies & run pytest
+        run: |
+          cd fastapi-gateway
+          pip install -r requirements.txt
+          pytest
+
+  activity-service-test:
+    name: Node.js Activity Service Tests (CO2, CO4)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run Activity Tests
+        run: |
+          cd activity-service
+          npm install
+          npm test
+
+  frontend-build:
+    name: React Frontend Build & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies and build
+        run: |
+          cd frontend
+          npm install
+          npm run build

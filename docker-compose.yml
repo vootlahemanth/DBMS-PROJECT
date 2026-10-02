@@ -1,0 +1,138 @@
+# ============================================================
+# CO6 — Deployment, Observability & Delivery
+# Topic: Multi-Service Docker Orchestration (docker-compose)
+# Purpose: Orchestrates 5 microservices + MySQL + MongoDB + Redis + Kafka + Zookeeper
+# ============================================================
+
+services:
+  # ------------------------------------------------------------
+  # Data Stores & Infrastructure Tier
+  # ------------------------------------------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: ut-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-universal_ticket_booking}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change_me}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  mongodb:
+    image: mongo:7.0
+    container_name: ut-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: ut-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: ut-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: ut-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  # ------------------------------------------------------------
+  # Microservices Application Tier
+  # ------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../Dockerfile.backend
+    container_name: ut-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      kafka:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-universal_ticket_booking}
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change_me}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+  activity-service:
+    build:
+      context: ./activity-service
+      dockerfile: ../Dockerfile.activity
+    container_name: ut-activity-service
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+      - kafka
+    ports:
+      - "5001:5001"
+    environment:
+      PORT: 5001
+      MONGO_URI: mongodb://mongodb:27017/universal_tickets_activity
+
+  fastapi-gateway:
+    build:
+      context: ./fastapi-gateway
+      dockerfile: ../Dockerfile.gateway
+    container_name: ut-fastapi-gateway
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - activity-service
+    ports:
+      - "8000:8000"
+    environment:
+      AUTH_SERVICE_URL: http://backend:8080/api
+      EVENT_SERVICE_URL: http://backend:8080/api
+      BOOKING_SERVICE_URL: http://backend:8080/api
+      ACTIVITY_SERVICE_URL: http://activity-service:5001/api
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../Dockerfile.frontend
+    container_name: ut-frontend
+    restart: unless-stopped
+    depends_on:
+      - fastapi-gateway
+    ports:
+      - "5173:80"
+
+volumes:
+  mysql_data:
+  mongo_data:
