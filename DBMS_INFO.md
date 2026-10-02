@@ -6,7 +6,7 @@
 **Faculty Guide:** Dr. Prasanthi  
 **Team Members:**
 - **V. Hemanth** — 2520030025
-- **K. Chaitanya** — 2520030263
+- **K. Chaitanya** — 2520030266
 - **CH. Vivek** — 2520030532
 
 ---
@@ -295,7 +295,8 @@ GROUP BY e.event_id, e.event_name, e.event_type;
 ### How Semantic Search Works (TF-IDF + Cosine Similarity)
 1. **Document Corpus Construction**: For each event, a rich text document is formed combining `eventName + eventType + description + language + venue + city`.
 2. **TF-IDF Vectorization**: Text is tokenized, stop words are removed, and Term Frequency-Inverse Document Frequency matrices are calculated:
-   $$	ext{TF-IDF}(t, d, D) = 	ext{TF}(t, d) 	imes \log\left(rac{|D|}{1 + |\{d \in D : t \in d\}|}ight)$$
+   $$	ext{TF-IDF}(t, d, D) = 	ext{TF}(t, d) 	imes \log\left(rac{|D|}{1 + |\{d \in D : t \in d\}|}
+ight)$$
 3. **Cosine Similarity Calculation**: The user query is vectorized into the same vector space. The cosine of the angle between query vector $\mathbf{q}$ and document vector $\mathbf{d}$ is computed:
    $$	ext{Similarity}(\mathbf{q}, \mathbf{d}) = rac{\mathbf{q} \cdot \mathbf{d}}{\|\mathbf{q}\| \|\mathbf{d}\|}$$
 4. **Ranked Retrieval**: Events with similarity scores exceeding threshold (0.15) are sorted in descending order and returned.
