@@ -1,6 +1,6 @@
 # Universal Tickets — Commercial Enterprise Ticket Booking System
 **Course:** Database Systems Engineering and Distributed Backend Development (25CS1302E)  
-**Team 2 (Section 9):** V. Hemanth (2520030025), K. Chaitanya (2520030263), CH. Vivek (2520030532)  
+**Team 2 (Section 9):** V. Hemanth (2520030025), K. Chaitanya (2520030266), CH. Vivek (2520030532)  
 **Faculty Guide:** Dr. Prasanthi
 
 ---
