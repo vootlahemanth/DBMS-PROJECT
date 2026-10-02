@@ -1,0 +1,32 @@
+========================================================================
+UNIVERSAL TICKETS — EXPO STARTUP GUIDE
+========================================================================
+
+1. Open PowerShell in this directory:
+   cd "C:\Users\VOOTLA HEMANTH\Desktop\DBSE\Universal_Tickets_EXPO_READY"
+
+2. Ensure MySQL 8.0 Server is running on port 3306:
+   Database: universal_ticket_booking (Schema in database/schema.sql)
+
+3. Configure your local .env (if needed):
+   Copy-Item .env.example .env
+
+4. Start all 4 microservices with one command:
+   powershell -ExecutionPolicy Bypass -File .\start-project.ps1
+
+5. Open your browser:
+   - Frontend SPA:      http://localhost:5173/
+   - Spring Boot API:   http://localhost:8080/api/events
+   - FastAPI Docs:      http://localhost:8000/docs
+   - Node Health Check: http://localhost:5001/health
+
+6. Demo Logins:
+   - Admin:     admin@universaltickets.local     / Admin@12345
+   - Verifier:  suresh.menon@ticketplatform.com  / Customer@12345
+   - Organizer: organizer@universaltickets.local / Organizer@12345
+   - Customer:  customer@universaltickets.local  / Customer@12345
+
+7. Stop all services when done:
+   powershell -ExecutionPolicy Bypass -File .\stop-project.ps1
+
+========================================================================
